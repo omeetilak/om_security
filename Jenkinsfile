@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // This is the recommended way to check out the repository.
+                // Checks out the code from the repo Jenkins is configured with
                 checkout scm
             }
         }
@@ -16,7 +16,7 @@ pipeline {
                 sh 'pip install -r requirements.txt'
             }
         }
-        stage('Run Unit Tests') {
+        stage('Run Tests') {
             steps {
                 sh 'pytest'
             }
