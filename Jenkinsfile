@@ -1,24 +1,23 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.9-slim'
-        }
-    }
+    agent any
+
     stages {
         stage('Checkout') {
             steps {
-                // Checks out the code from the repo Jenkins is configured with
-                checkout scm
+                // Replace with your repo URL
+                git branch: 'main', url: 'https://github.com/sarthak20052005/simple_python_web_app.git'
             }
         }
-        stage('Install Dependencies') {
+
+        stage('Install') {
             steps {
                 sh 'pip install -r requirements.txt'
             }
         }
-        stage('Run Tests') {
+
+        stage('Test') {
             steps {
-                sh 'pytest'
+                sh 'pytest -q'
             }
         }
     }
