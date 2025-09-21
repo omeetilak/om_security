@@ -4,20 +4,27 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Replace with your repo URL
-                git branch: 'main', url: 'https://github.com/sarthak20052005/simple_python_web_app.git'
+                git 'https://github.com/sarthak20052005/simple_python_web_app.git'
             }
         }
 
         stage('Install') {
             steps {
-                sh 'pip install -r requirements.txt'
+                sh '''
+                    python3 -m venv venv        # create virtual environment
+                    . venv/bin/activate         # activate it
+                    pip install --upgrade pip   # upgrade pip
+                    pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Test') {
             steps {
-                sh 'pytest -q'
+                sh '''
+                    . venv/bin/activate
+                    pytest --maxfail=1 --disable-warnings -q
+                '''
             }
         }
     }
