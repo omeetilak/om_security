@@ -1,0 +1,78 @@
+name: CI Security Scan
+
+on:
+  push:
+    branches:
+      - main
+      - "**"
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Required for git diff in CI detector
+
+      # 2) Build scanner Docker image
+      - name: Build Docker Image for Scanner
+        run: |
+          docker build -t cicd-scan:ci -f docker/Dockerfile .
+
+      # 3) Run scanner inside Docker
+      - name: Run security scanner
+        id: scan
+        run: |
+          mkdir -p scan_reports
+          docker run --rm \
+            -v "${{ github.workspace }}:/workspace" \
+            cicd-scan:ci /workspace \
+              --output "/workspace/scan_reports/report.json" \
+              --html "/workspace/scan_reports/report.html"
+        continue-on-error: true
+
+      # 4) Upload scan reports as artifacts
+      - name: Upload scan reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: scan-reports
+          path: scan_reports
+
+      # 5) Fail job if scanner action == fail
+      - name: Evaluate scan result and fail if needed
+        run: |
+          SCORE=$(jq '.score' scan_reports/report.json)
+          ACTION=$(jq -r '.action' scan_reports/report.json)
+
+          echo "Score: $SCORE"
+          echo "Action: $ACTION"
+
+          if [[ "$ACTION" == "fail" ]]; then
+            echo "❌ Detected malicious indicators — failing CI"
+            exit 1
+          elif [[ "$ACTION" == "warn" ]]; then
+            echo "⚠️ Warning detected — review recommended but build continues"
+          else
+            echo "✅ Scan clean — build continues"
+          fi
+
+      # 6) OPTIONAL — Upload incident to API dashboard
+      - name: Upload report to dashboard API
+        if: always()
+        run: |
+          REPORT_API="${{secrets.REPORT_API_URL}}"
+          if [ -n "$REPORT_API" ]; then
+            echo "Uploading scan report to $REPORT_API"
+            curl -s -X POST "$REPORT_API/incidents" \
+              -H "Content-Type: application/json" \
+              --data-binary @scan_reports/report.json \
+              || echo "Upload to dashboard API failed"
+          else
+            echo "REPORT_API_URL not set — skipping dashboard upload"
+          fi
