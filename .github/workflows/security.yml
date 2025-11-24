@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run CI/CD Integrity Scanner
-        uses: your-username/your-scanner-repo@v1
+        uses: omeetilak/cicd-integrity-monitor@v1
         with:
           path: "."
           api_url: ${{ secrets.REPORT_API_URL }}
