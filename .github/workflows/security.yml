@@ -1,0 +1,19 @@
+name: Security Scan
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run CI/CD Integrity Scanner
+        uses: omeetilak/cicd-integrity-monitor@v1   # <-- your Action
+        with:
+          path: .
+          api_url: ${{ secrets.REPORT_API_URL }}
+          api_key: ${{ secrets.REPORT_API_KEY }}
