@@ -7,13 +7,13 @@ on:
 jobs:
   scan:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Run CI/CD Integrity Scanner
-        uses: omeetilak/cicd-integrity-monitor@v1
+        uses: omeetilak/cicd-integrity-monitor@v1   # <-- your Action
         with:
-          path: "."
+          path: .
           api_url: ${{ secrets.REPORT_API_URL }}
           api_key: ${{ secrets.REPORT_API_KEY }}
