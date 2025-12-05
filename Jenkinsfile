@@ -2,11 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/omeetilak/om_security.git'
-            }
-        }
 
         stage('Install Dependencies') {
             steps {
