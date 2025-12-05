@@ -16,7 +16,6 @@ pipeline {
 
         stage('Lint') {
             steps {
-                // Windows cannot run flake8 directly through sh, so use bat
                 bat 'flake8 . || ver > nul'
             }
         }
