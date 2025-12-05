@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        TRIVY = "C:\\Path\\To\\trivy.exe"   // <-- update this to your actual trivy.exe path
+    }
+
     stages {
 
         stage('Install Dependencies') {
@@ -23,13 +27,13 @@ pipeline {
 
         stage('Security Scan - Filesystem') {
             steps {
-                bat 'trivy fs . --exit-code 0 --severity HIGH,CRITICAL -o trivy_fs_report.txt'
+                bat '"%TRIVY%" fs . --exit-code 0 --severity HIGH,CRITICAL -o trivy_fs_report.txt'
             }
         }
 
         stage('Security Scan - Dependencies') {
             steps {
-                bat 'trivy fs --dependency-tree . -o trivy_deps_report.txt'
+                bat '"%TRIVY%" fs --dependency-tree . -o trivy_deps_report.txt'
             }
         }
 
