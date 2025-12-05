@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        TRIVY = "C:\Users\admin\AppData\Local\Microsoft\WinGet\Packages\AquaSecurity.Trivy_Microsoft.Winget.Source_8wekyb3d8bbwe\trivy.exe"   // <-- update this to your actual trivy.exe path
+        TRIVY = """C:\Users\admin\AppData\Local\Microsoft\WinGet\Packages\AquaSecurity.Trivy_Microsoft.Winget.Source_8wekyb3d8bbwe\trivy.exe"""   // <-- update this to your actual trivy.exe path
     }
 
     stages {
