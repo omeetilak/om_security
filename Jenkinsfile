@@ -4,27 +4,44 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/omeetilak/om_security.git'
+                git 'https://github.com/omeetilak/om_security.git'
             }
         }
 
-        stage('Install') {
+        stage('Install Dependencies') {
             steps {
-                sh '''
-                    python3 -m venv venv        # create virtual environment
-                    . venv/bin/activate         # activate it
-                    pip install --upgrade pip   # upgrade pip
-                    pip install -r requirements.txt
-                '''
+                bat 'pip install -r requirements.txt'
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                // Windows cannot run flake8 directly through sh, so use bat
+                bat 'flake8 . || ver > nul'
             }
         }
 
         stage('Test') {
             steps {
-                sh '''
-                    . venv/bin/activate
-                    pytest --maxfail=1 --disable-warnings -q
-                '''
+                bat 'pytest --maxfail=1 --disable-warnings -q'
+            }
+        }
+
+        stage('Security Scan - Filesystem') {
+            steps {
+                bat 'trivy fs . --exit-code 0 --severity HIGH,CRITICAL -o trivy_fs_report.txt'
+            }
+        }
+
+        stage('Security Scan - Dependencies') {
+            steps {
+                bat 'trivy fs --dependency-tree . -o trivy_deps_report.txt'
+            }
+        }
+
+        stage('Archive Reports') {
+            steps {
+                archiveArtifacts artifacts: 'trivy*.txt', fingerprint: true
             }
         }
     }
